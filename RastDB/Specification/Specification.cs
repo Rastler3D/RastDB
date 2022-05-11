@@ -1,0 +1,66 @@
+﻿namespace RastDB.Specification;
+
+public static class TableHeader
+{
+    public const ushort
+        MAGIC_NUMBER = 0x1eaf;
+
+    public const int
+        MAGIC_NUMBER_OFFSET = 0,
+        MAGIC_NUMBER_SIZE = sizeof(byte),
+        PAGETYPE_OFFSET = MAGIC_NUMBER_OFFSET + MAGIC_NUMBER_SIZE,
+        PAGETYPE_SIZE = sizeof(byte),
+        PAGEFLAG_OFFSET = PAGETYPE_OFFSET + PAGETYPE_SIZE,
+        PAGEFLAG_SIZE = sizeof(byte),
+        PREVIOUS_PAGE_OFFSET = PAGEFLAG_OFFSET + PAGEFLAG_SIZE,
+        PREVIOUS_PAGE_SIZE = sizeof(ushort),
+        NEXT_PAGE_OFFSET = PREVIOUS_PAGE_OFFSET + PREVIOUS_PAGE_SIZE,
+        NEXT_PAGE_SIZE = sizeof(ushort),
+        RECORDS_COUNT_OFFSET = NEXT_PAGE_OFFSET + NEXT_PAGE_SIZE,
+        RECORDS_COUNT_SIZE = sizeof(ushort),
+        RECORD_SIZE_OFFSET = RECORDS_COUNT_OFFSET + RECORDS_COUNT_SIZE,
+        RECORD_SIZE_SIZE = sizeof(ushort),
+        FREE_SPACE_OFFSET = RECORDS_COUNT_OFFSET + RECORDS_COUNT_SIZE,
+        FREE_SPACE_SIZE = sizeof(ushort),
+        CREATION_DATE_OFFSET = FREE_SPACE_OFFSET + FREE_SPACE_SIZE,
+        CREATION_DATE_SIZE = sizeof(long),
+        LAST_MODIFIED_OFFSET = CREATION_DATE_OFFSET + CREATION_DATE_SIZE,
+        LAST_MODIFIED_SIZE = sizeof(long),
+        FIELD_DESCRIPTION_OFFSET = LAST_MODIFIED_OFFSET + LAST_MODIFIED_SIZE;
+}
+
+public static class FieldDescription
+{
+    public const int
+        FIELD_NAME_OFFSET = 0,
+        FIELD_NAME_SIZE = sizeof(char) * 32,
+        FIELD_TYPE_OFFSET = FIELD_NAME_OFFSET + FIELD_NAME_SIZE,
+        FIELD_TYPE_SIZE = sizeof(byte),
+        FIELD_LENGTH_OFFSET = FIELD_TYPE_OFFSET + FIELD_TYPE_SIZE,
+        FIELD_LENGTH_SIZE = sizeof(byte),
+        FIELD_OFFSET_OFFSET = FIELD_LENGTH_OFFSET + FIELD_LENGTH_SIZE,
+        FIELD_OFFSET_SIZE = sizeof(byte),
+        FIELD_INDEX_OFFSET = FIELD_OFFSET_OFFSET + FIELD_OFFSET_SIZE,
+        FIELD_INDEX_SIZE = sizeof(byte),
+        FIELD_CONSTRAINT_OFFSET = FIELD_INDEX_OFFSET + FIELD_INDEX_SIZE,
+        FIELD_CONSTRAINT_SIZE = sizeof(byte),
+        NEXT_AUTOINCREMENT_OFFSET = FIELD_CONSTRAINT_OFFSET + FIELD_CONSTRAINT_SIZE,
+        NEXT_AUTOINCREMENT_SIZE = sizeof(ulong),
+        FIELD_DESCRIPTION_SIZE = NEXT_AUTOINCREMENT_OFFSET + NEXT_AUTOINCREMENT_SIZE,
+        FIELD_DESCRIPTION_TERMINATOR_SIZE = sizeof(byte);
+
+    public const byte
+        FIELD_DESCRIPTION_TERMINATOR = 0x0D;
+
+
+
+}
+public static class RecordDescription
+{
+    public const int
+        RECORD_FREE_FLAG_OFFSET = 0,
+        RECORD_FREE_FLAG_SIZE = sizeof(byte),
+        RECORD_NEXT_FREE_OFFSET = RECORD_FREE_FLAG_OFFSET + RECORD_FREE_FLAG_SIZE,
+        RECORD_NEXT_FREE_SIZE = sizeof(byte),
+        RECORD_VALUES_OFFSET = RECORD_NEXT_FREE_OFFSET + RECORD_NEXT_FREE_SIZE;
+}
