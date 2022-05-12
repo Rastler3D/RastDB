@@ -8,5 +8,10 @@ namespace RastFileSystem
 {
     internal class SparseAllocatedFileView
     {
+        public void ai()
+        {
+            RastFileSystem.File a = new RastFileSystem.Directory().Entries.First();
+            Console.WriteLine(a.Size);
+        }
     }
 }

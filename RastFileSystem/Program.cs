@@ -3,14 +3,16 @@ using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
 using static RastFileSystem.MemoryMappedFileExtensions;
+
 unsafe
 {
+    new DirectoryInfo("/rdb.rdb").
     FileStream fs = new FileStream($"RastFS.txt", FileMode.OpenOrCreate);
     fs.SetLength(20000);
     fs.Flush();
     var str = MemoryMappedFile.CreateFromFile(fs, null,fs.Length, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, false);
     int page_size = 4096;
-
+    DirectoryInfo
 
     IntPtr handle = str.SafeMemoryMappedFileHandle.DangerousGetHandle();
 

@@ -6,12 +6,9 @@ using System.Threading.Tasks;
 
 namespace RastFileSystem
 {
-    public unsafe class File
+    public unsafe class File : FileSystemEntity
     {
-        internal FileDescriptor* FileDescriptor;
-        internal MemorySequence MemorySequence;
-        internal FileSystemManager FileSystemManager;
-        public long Size
+        unsafe public long Size
         {
             get => FileDescriptor->Size;
             set => FileSystemManager.SetFileSize(FileDescriptor, value);

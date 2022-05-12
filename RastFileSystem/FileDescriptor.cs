@@ -21,7 +21,7 @@ namespace RastFileSystem
 	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public unsafe struct FileDescriptor
 	{
-		public fixed byte Name[8];
+		public fixed byte Name[28];
 
 		public fixed byte Extension[3];
 

@@ -197,7 +197,22 @@ namespace RastFileSystem
             }
 
         }
-
+        public FileSystemEntity GetFSEntity(FileDescriptor* fileDescriptor)
+        {
+            if((fileDescriptor->Attribute & FileAttribute.IsDirectory) > 0)
+            {
+                return GetDirectory(fileDescriptor);
+            }
+            return GetFile(fileDescriptor);
+        }
+        public File GetFile(FileDescriptor* fileDescriptor)
+        {
+            return new File { FileDescriptor = fileDescriptor, FileSystemManager = this };
+        }
+        public Directory GetDirectory(FileDescriptor* fileDescriptor)
+        {
+            return new Directory { FileDescriptor = fileDescriptor, FileSystemManager = this };
+        }
         public void DeleteFile(FileDescriptor* fileDescriptor)
         {
             throw new NotImplementedException();

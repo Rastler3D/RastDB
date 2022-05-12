@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO.MemoryMappedFiles;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,6 +21,7 @@ namespace RastFileSystem
         public MemorySequence(params MemoryMappedViewAccessor[] memoryBlocks)
         {
             _memoryBlocks = memoryBlocks.ToList();
+            Length = _memoryBlocks.Sum(x=>x.Capacity);
         }
 
         public byte this[long index]
@@ -63,6 +65,33 @@ namespace RastFileSystem
             SetValue(nextIndex, value, block++);
         }
 
+        public IntPtr GetPointer(long index)
+        {
+            return GetPointer(index, 0);
+        }
+
+        private IntPtr GetPointer(long index,int block)
+        {
+            if (block >= _memoryBlocks.Count)
+            {
+                throw new IndexOutOfRangeException();
+            }
+
+            long nextIndex = index - _memoryBlocks[block].Capacity;
+
+            if (nextIndex < 0)
+            {
+                unsafe
+                {
+                    byte* pointer = (byte*)IntPtr.Zero;
+                    _memoryBlocks[block].SafeMemoryMappedViewHandle.AcquirePointer(ref pointer);
+                    pointer += index;
+                    return (IntPtr)pointer;
+                }
+            }
+
+            return GetPointer(nextIndex, block++);
+        }
         public void Add(MemoryMappedViewAccessor memoryBlock)
         {
             _memoryBlocks.Add(memoryBlock);
@@ -79,9 +108,19 @@ namespace RastFileSystem
             }
             _memoryBlocks = _memoryBlocks.Take(targetCount).ToList();
         }
+        public IEnumerable<IntPtr> GetPointerEnumerator<T>()
+        {
+            int typeSize = Unsafe.SizeOf<T>();
+            for (int i = 0; i < Length; i+=typeSize)
+            {
+                yield return GetPointer(i);
+            }
+
+            yield break;
+        }
         public IEnumerator<byte> GetEnumerator()
         {
-            for (int i = 0; i < _memoryBlocks.Count; i++)
+            for (int i = 0; i < Length; i++)
             {
                 yield return this[i];
             }
