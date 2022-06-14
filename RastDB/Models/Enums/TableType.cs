@@ -1,9 +1,9 @@
 ﻿namespace RastDB;
 
-public enum PageType : byte
+public enum TableType : byte
 {
     Header,
-    Pages,
+    TableList,
     Transaction,
     Pointer,
     Index,

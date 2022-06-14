@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RastFileSystem
+namespace RastFileSystem.IO
 {
     public class RfsStream : Stream
     {
@@ -15,7 +15,7 @@ namespace RastFileSystem
         {
             _file = file;
         }
-        public long RemainsToEnd => (Length - 1) - Position;
+        public long RemainsToEnd => Length - Position;
 
 
         public override bool CanRead => true;
@@ -31,13 +31,14 @@ namespace RastFileSystem
             get => _position;
             set
             {
-                if ((value > 0) && (value < Length - 1))
+                if (value >= 0 && value <= Length)
                 {
                     _position = value;
                 }
                 else
                 {
-                    throw new IndexOutOfRangeException();
+                    SetLength(value);
+                    _position = value;
                 }
             }
         }

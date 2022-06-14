@@ -2,9 +2,9 @@
 
 public enum DataType : byte
 {
-    INT = 1,
+    INT = 0,
     NVARCHAR = 1,
-    DECIMAL
+    DECIMAL = 2
 }
 
 

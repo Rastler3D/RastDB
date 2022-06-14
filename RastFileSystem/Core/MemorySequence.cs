@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RastFileSystem
+namespace RastFileSystem.Core
 {
     public class MemorySequence : IEnumerable<byte>
     {
@@ -16,12 +16,15 @@ namespace RastFileSystem
 
         private List<MemoryMappedViewAccessor> _memoryBlocks;
 
-        public long Length { get; set; } = 0;
+        public long Size { get; set; } = 0;
 
-        public MemorySequence(params MemoryMappedViewAccessor[] memoryBlocks)
+        public MemorySequence(params MemoryMappedViewAccessor[] memoryBlocks) : this(memoryBlocks.Sum(x => x.Capacity), memoryBlocks)
+        { }
+
+        public MemorySequence(long Size, params MemoryMappedViewAccessor[] memoryBlocks)
         {
             _memoryBlocks = memoryBlocks.ToList();
-            Length = _memoryBlocks.Sum(x=>x.Capacity);
+            this.Size = Size;
         }
 
         public byte this[long index]
@@ -33,7 +36,7 @@ namespace RastFileSystem
 
         private byte GetValue(long index, int block = 0)
         {
-            if (block >= _memoryBlocks.Count)
+            if (block >= _memoryBlocks.Count && index >= Size && index < 0)
             {
                 throw new IndexOutOfRangeException();
             }
@@ -45,12 +48,12 @@ namespace RastFileSystem
                 return _memoryBlocks[block].ReadByte(index);
             }
 
-            return GetValue(nextIndex, block++);
+            return GetValue(nextIndex, ++block);
         }
 
         private void SetValue(long index, byte value, int block = 0)
         {
-            if (block >= _memoryBlocks.Count)
+            if (block >= _memoryBlocks.Count && index >= Size && index < 0)
             {
                 throw new IndexOutOfRangeException();
             }
@@ -60,9 +63,10 @@ namespace RastFileSystem
             if (nextIndex < 0)
             {
                 _memoryBlocks[block].Write(index, value);
+                return;
             }
 
-            SetValue(nextIndex, value, block++);
+            SetValue(nextIndex, value, ++block);
         }
 
         public IntPtr GetPointer(long index)
@@ -70,9 +74,9 @@ namespace RastFileSystem
             return GetPointer(index, 0);
         }
 
-        private IntPtr GetPointer(long index,int block)
+        private IntPtr GetPointer(long index, int block)
         {
-            if (block >= _memoryBlocks.Count)
+            if (block >= _memoryBlocks.Count && index >= Size && index < 0)
             {
                 throw new IndexOutOfRangeException();
             }
@@ -111,7 +115,7 @@ namespace RastFileSystem
         public IEnumerable<IntPtr> GetPointerEnumerator<T>()
         {
             int typeSize = Unsafe.SizeOf<T>();
-            for (int i = 0; i < Length; i+=typeSize)
+            for (int i = 0; i < Size; i += typeSize)
             {
                 yield return GetPointer(i);
             }
@@ -120,7 +124,7 @@ namespace RastFileSystem
         }
         public IEnumerator<byte> GetEnumerator()
         {
-            for (int i = 0; i < Length; i++)
+            for (int i = 0; i < Size; i++)
             {
                 yield return this[i];
             }

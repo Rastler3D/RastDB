@@ -7,9 +7,9 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RastFileSystem
+namespace RastFileSystem.Extensions
 {
-    public static unsafe class MemoryMappedFileExtensions
+    public static unsafe class Extensions
     {
         [Flags]
         public enum FreeType
@@ -59,7 +59,7 @@ namespace RastFileSystem
 
         public static byte* CreateViewPointer(this MemoryMappedFile mappedFile, byte* desiredAddress = null)
         {
-            return CreateViewPointer(mappedFile, 0, 0, desiredAddress);
+            return mappedFile.CreateViewPointer(0, 0, desiredAddress);
         }
         public static byte* CreateViewPointer(this MemoryMappedFile mappedFile, long offset, long size, byte* desiredAddress = null)
         {

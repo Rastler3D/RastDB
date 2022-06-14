@@ -12,4 +12,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <LangVersion>preview</LangVersion>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RastFileSystem\RastFileSystem.csproj" />
+  </ItemGroup>
 </Project>

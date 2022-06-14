@@ -1,63 +1,70 @@
-﻿using RastDB;
+﻿using System.Data.SqlTypes;
+using RastDB;
 using RastDB.Extensions;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
+using RastDB.Models.Classes;
 
-int pageSize = 1024;
-string fileName = "File.rdb";
-MemoryMappedFile dbFile = MemoryMappedFile.CreateFromFile(fileName, FileMode.OpenOrCreate, "Db", 1_000);
-
-
+Database database = InitilizeDatabase();
+PrintTable(database.DataTables[0]);
 
 
 
 
+void PrintTable(Table table)
+{
+    foreach (var field in table.FieldDescriptions)
+    {
+        Console.Write("{0,-25}", field.FieldName);
+    }
+    foreach (var record in table.Records)
+    {
+        Console.WriteLine("\n\n");
+        foreach (var value in record)
+        {
+            Console.Write("{0,-25}", value);
+        }
+    }
+}
 
 
+Database InitilizeDatabase()
+{
+    Database database = Database.CreateDatabase("database.dbf","MyDataBase");
+    Table productTable = database.AddTable("Product", new[]
+    {
+        new ColumnDefinition
+        {
+            Name = "Id",
+            DataType = TypeDefinition.INT(),
+            Identity = (0,1)
+        },
+        new ColumnDefinition
+        {
+            Name = "Name",
+            DataType = TypeDefinition.NVARCHAR(30)
+        },
+        new ColumnDefinition
+        {
+            Name = "Price",
+            DataType = TypeDefinition.DECIMAL(10,2)
+        }
+    });
+    productTable.Records.Add(new()
+    {
+        { "Name", "Chicken" },
+        { "Price", "100.5000" }
+    });
+    productTable.Records.Add(new()
+    {
+        { "Name", "Phone" },
+        { "Price", "1312.32100" }
+    });
+    productTable.Records.Add(new()
+    {
+        { "Name", "Computer" },
+        { "Price", "51210313131231909.5000" }
+    });
 
-
-
-
-
-//Page page = new Page
-//{
-//    PageHeader = new()
-//    {
-//        CreationDate = DateTime.Now,
-//        FreeSpace = 10,
-//        LastModifiedDate = DateTime.Now,
-//        NextPage = 100,
-//        PageFlag = PageFlag.FreeSpace,
-//        PageType = PageType.Data,
-//        PreviousPage = 10,
-//        RecordsCount = 10,
-//        RecordSize = 10,
-
-//    },
-//    FieldDescriptions = new() {
-//        new()
-//        {
-//            FieldAttributes = new string[0],
-//            FieldConstrain = 1,
-//            FieldIndex = 0,
-//            FieldLength = 0,
-//            FieldName = "Ale",
-//            FieldOffset = 0,
-//            FieldType = DataType.INT,
-//            NextAutoIncrement = "1"
-
-//        }
-
-//    },
-//    Records = new() {
-//        new()
-//        {
-//             IsFree=true,
-//             NextFree=1,
-//             Value="10"
-//        }
-//    }
-
-
-//};
-//PageWriter.Write(page,stream);
+    return database;
+}
