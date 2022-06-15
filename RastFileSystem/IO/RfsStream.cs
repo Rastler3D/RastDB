@@ -1,92 +1,82 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace RastFileSystem.IO;
 
-namespace RastFileSystem.IO
+public class RfsStream : Stream
 {
-    public class RfsStream : Stream
+    private readonly File _file;
+
+    private long _position;
+
+    public RfsStream(File file)
     {
-        private readonly File _file;
+        _file = file;
+    }
 
-        private long _position = 0;
-        public RfsStream(File file)
+    public long RemainsToEnd => Length - Position;
+
+
+    public override bool CanRead => true;
+
+    public override bool CanSeek => true;
+
+    public override bool CanWrite => true;
+
+    public override long Length => _file.Size;
+
+    public override long Position
+    {
+        get => _position;
+        set
         {
-            _file = file;
-        }
-        public long RemainsToEnd => Length - Position;
-
-
-        public override bool CanRead => true;
-
-        public override bool CanSeek => true;
-
-        public override bool CanWrite => true;
-
-        public override long Length => _file.Size;
-
-        public override long Position
-        {
-            get => _position;
-            set
+            if (value >= 0 && value <= Length)
             {
-                if (value >= 0 && value <= Length)
-                {
-                    _position = value;
-                }
-                else
-                {
-                    SetLength(value);
-                    _position = value;
-                }
+                _position = value;
+            }
+            else
+            {
+                SetLength(value);
+                _position = value;
             }
         }
+    }
 
-        public override void Flush()
+    public override void Flush()
+    {
+        _file.MemorySequence.Flush();
+    }
+
+    public override int Read(byte[] buffer, int offset, int count)
+    {
+        int readedBytes;
+        for (readedBytes = 0; readedBytes < count; readedBytes++)
         {
-            _file.MemorySequence.Flush();
+            if (RemainsToEnd == 0) break;
+            buffer[offset + readedBytes] = _file.MemorySequence[Position++];
         }
 
-        public override int Read(byte[] buffer, int offset, int count)
-        {
-            int readedBytes;
-            for (readedBytes = 0; readedBytes < count; readedBytes++)
-            {
-                if (RemainsToEnd == 0) break;
-                buffer[offset + readedBytes] = _file.MemorySequence[Position++];
-            }
-            return readedBytes;
-        }
+        return readedBytes;
+    }
 
-        public override long Seek(long offset, SeekOrigin origin)
+    public override long Seek(long offset, SeekOrigin origin)
+    {
+        Position = origin switch
         {
-            Position = origin switch
-            {
-                SeekOrigin.Begin => 0,
-                SeekOrigin.Current => Position,
-                SeekOrigin.End => Length - 1,
-                _ => throw new NotImplementedException(),
-            } + offset;
+            SeekOrigin.Begin => 0,
+            SeekOrigin.Current => Position,
+            SeekOrigin.End => Length - 1,
+            _ => throw new NotImplementedException()
+        } + offset;
 
-            return Position;
-        }
+        return Position;
+    }
 
-        public override void SetLength(long value)
-        {
-            _file.Size = value;
-        }
+    public override void SetLength(long value)
+    {
+        _file.Size = value;
+    }
 
-        public override void Write(byte[] buffer, int offset, int count)
-        {
-            if (RemainsToEnd < count)
-            {
-                SetLength(Length + (count - RemainsToEnd));
-            }
-            for (int i = 0; i < count; i++)
-            {
-                _file.MemorySequence[Position++] = buffer[offset + i];
-            }
-        }
+    public override void Write(byte[] buffer, int offset, int count)
+    {
+        if (RemainsToEnd < count) SetLength(Length + (count - RemainsToEnd));
+        for (var i = 0; i < count; i++) _file.MemorySequence[Position++] = buffer[offset + i];
     }
 }
